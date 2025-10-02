@@ -4,9 +4,15 @@ import { AppService } from './app.service';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ExceptionsFilterFilter } from './common/filters/http-exception.filter';
 import { ValidationPipe } from './common/pipes/validation.pipe';
+import { ConfigModule } from './config/config.module';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { typeOrmConfig } from './config/typeorm.config';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.register(),
+    TypeOrmModule.forRoot(typeOrmConfig as TypeOrmModuleOptions),
+  ],
   controllers: [AppController],
   providers: [
     {
