@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app-lds
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - nestjs-network
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+  redis:
+    container_name: redis-lds
+    image: redis:8-alpine
+    networks:
+      - nestjs-network
+    ports:
+      - "6379:6379"
+    restart: always
+    volumes:
+      - redis-data:/data
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-lds
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=devpass123
+      - MYSQL_DATABASE=nestjs_dev
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - nestjs-network
+    restart: unless-stopped
+volumes:
+  redis-data:
+    driver: local
+  mysql_data:
+    driver: local
+
+networks:
+  nestjs-network:
+    driver: bridge
