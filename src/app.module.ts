@@ -7,11 +7,21 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
 import { ConfigModule } from './config/config.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { StoresModule } from './modules/stores/stores.module';
+import { UserCurrentLocationModule } from './modules/user-current-location/user-current-location.module';
+import { UserFavoritesModule } from './modules/user-favorites/user-favorites.module';
 
 @Module({
   imports: [
     ConfigModule.register(),
     TypeOrmModule.forRoot(typeOrmConfig as TypeOrmModuleOptions),
+    UsersModule,
+    AuthModule,
+    StoresModule,
+    UserCurrentLocationModule,
+    UserFavoritesModule,
   ],
   controllers: [AppController],
   providers: [
