@@ -37,6 +37,9 @@ export class ConfigService {
       DB_TYPE: Joi.string().required(),
       REDIS_HOST: Joi.string().required(),
       REDIS_PORT: Joi.number().required(),
+      JWT_SECRET_KEY: Joi.string().required(),
+      JWT_ACCESS_TOKEN_EXPIRES_TIME: Joi.string().required(),
+      JWT_REFRESH_TOKEN_EXPIRES_TIME: Joi.string().required(),
     });
 
     const { error, value } = joiSchema.validate(env);
