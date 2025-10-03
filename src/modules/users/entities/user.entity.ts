@@ -11,6 +11,9 @@ export class UserEntity {
   @Column()
   password: string;
 
+  @Column()
+  salt: string;
+
   // admin or user
   @Column()
   role: string;

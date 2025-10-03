@@ -19,6 +19,7 @@ import { GetListRequest } from 'src/models/pagination/pagination.model';
 import { UserEntity } from './entities/user.entity';
 import { CommonUtils } from '../../common/utils/common.utils';
 import { MessageCode } from '../../common/constants/message-code.constant';
+import { HashUtils } from 'src/common/utils/hash.utils';
 
 @Injectable()
 export class UsersService {
@@ -41,14 +42,12 @@ export class UsersService {
         })
       }
 
-      // reference user
-      let referenceUserId = 0;
-
-      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+      const salt = HashUtils.genRandomString(20);
+      const hashedPassword = HashUtils.hashPassword(createUserDto.password, salt);
       const newUser = this.usersRepository.create({
         email: createUserDto.email,
         password: hashedPassword,
-        role: createUserDto.role,
+        salt,
       });
       await this.usersRepository.save(newUser);
 
@@ -58,7 +57,6 @@ export class UsersService {
           status: ResponseStatus.Success,
           messageCode: MessageCode.SUCCESS,
         }),
-        referenceUserId,
       })
     } catch (error) {
       Logger.error(error);
@@ -150,7 +148,7 @@ export class UsersService {
     }
 
     const { password } = updateUserDto;
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
+    const hashedPassword = password ? HashUtils.hashPassword(password, user.salt) : undefined;
     user.password = hashedPassword;
     const userUpdated = await this.usersRepository.update({ id, isActive: true }, user);
     return new UpdateUserResponse({

@@ -15,12 +15,8 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsNotEmpty({ message: MessageCode.PASSWORD_IS_REQUIRED })
-  @MinLength(6, { message: MessageCode.PASSWORD_IS_INVALID_MIN_LENGTH })
+  @MinLength(10, { message: MessageCode.PASSWORD_IS_INVALID_MIN_LENGTH })
   password: string;
-
-  @ApiProperty()
-  @IsNotEmpty({ message: MessageCode.ROLE_IS_REQUIRED })
-  role: string;
 }
 
 export class CreateUserResponse implements IResponse {

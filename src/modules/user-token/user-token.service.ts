@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserTokenDto } from './dto/create-user-token.dto';
-import { UpdateUserTokenDto } from './dto/update-user-token.dto';
+import { Injectable, Logger } from '@nestjs/common';
+
+// tslint:disable-next-line: no-var-requires
+const ms = require('ms');
+
+import { UserTokenEntity } from './entities/user-token.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TokenType } from '../../common/constants/common';
 
 @Injectable()
 export class UserTokenService {
-  create(createUserTokenDto: CreateUserTokenDto) {
-    return 'This action adds a new userToken';
+  constructor(
+    @InjectRepository(UserTokenEntity) private readonly userTokenRepository: Repository<UserTokenEntity>,
+  ) {
   }
 
-  findAll() {
-    return `This action returns all userToken`;
+  public async saveUserToken(userId: string, rawToken: string, expiredIn: string): Promise<UserTokenEntity> {
+    try {
+      const expireTime = new Date(Date.now() + ms(expiredIn));
+
+      const userToken = this.userTokenRepository.create({
+        userId: userId,
+        type: TokenType.RESET_PASSWORD_TOKEN,
+        rawToken: rawToken,
+        expireTime: expireTime,
+      });
+      await this.userTokenRepository.save(userToken);
+      return userToken;
+    }
+    catch (error) {
+      Logger.error(`Error when saveUserToken: ${error.message}`);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userToken`;
+  public async findUserResetPasswordToken(userId: string, resetPasswordToken: string): Promise<UserTokenEntity> {
+    try {
+      return this.userTokenRepository.findOneBy({
+        userId, 
+        type: TokenType.RESET_PASSWORD_TOKEN,
+        rawToken: resetPasswordToken,
+        isActive: true,
+      });
+    }
+    catch (error) {
+      Logger.error(`Error when findUserResetPasswordToken: ${error.message}`);
+    }
   }
 
-  update(id: number, updateUserTokenDto: UpdateUserTokenDto) {
-    return `This action updates a #${id} userToken`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} userToken`;
+  public async deleteResetPasswordToken(userId: string){
+    try {
+      return this.userTokenRepository.update({
+        userId,
+        type: TokenType.RESET_PASSWORD_TOKEN,
+        isActive: true,
+      }, {
+        isActive: false,
+      });
+    } catch (error) {
+      Logger.error(`Error when deleteResetPasswordToken: ${error.message}`);
+    }
   }
 }
