@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { RedisClientProvider } from './redis-client.provider';
-import { ConfigModule } from '../../config/config.module';
 import { EmailService } from './email.service';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [],
   controllers: [],
   providers: [
     RedisClientProvider,

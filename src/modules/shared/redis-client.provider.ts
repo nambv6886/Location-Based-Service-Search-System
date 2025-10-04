@@ -2,14 +2,13 @@ import { Logger } from '@nestjs/common';
 import redis = require('redis');
 
 import { REDIS_CLIENT } from '../../common/constants/common';
-import { ConfigModule } from '../../config/config.module';
-import { ConfigService } from '../../config/config.service';
+import { ConfigService } from '@nestjs/config';
 
 export const RedisClientProvider = {
-  imports: [ConfigModule],
+  imports: [],
   provide: REDIS_CLIENT,
   useFactory: async (config: ConfigService) => {
-    const redisUrl = config.get('redis');
+    const redisUrl = config.get('REDIS_URL');
     const client = redis.createClient({
       url: redisUrl
     });

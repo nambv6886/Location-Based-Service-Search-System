@@ -9,7 +9,6 @@ import { ForgotPasswordRequest, ForgotPasswordResponse, JwtPayload, LoginRequest
 import { ResponseMessage } from '../../models/interfaces/response.message.model';
 import { ResponseStatus } from '../../models/interfaces/response.status.model';
 import { UserEntity } from '../users/entities/user.entity';
-import { ConfigService } from '../../config/config.service';
 import { MessageCode } from '../../common/constants/message-code.constant';
 import { REDIS_CLIENT, REDIS_KEY_FORGOT_PASSWORD } from '../../common/constants/common';
 import { CommonUtils } from '../../common/utils/common.utils';
@@ -17,6 +16,7 @@ import { HashUtils } from '../../common/utils/hash.utils';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../shared/email.service';
 import { UserTokenEntity } from '../user-token/entities/user-token.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
