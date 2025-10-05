@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ExceptionsFilterFilter } from './common/filters/http-exception.filter';
-import { ValidationPipe } from './common/pipes/validation.pipe';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UsersModule } from './modules/users/users.module';
@@ -17,10 +16,9 @@ import { configSchema } from './config/config.service';
     ConfigModule.forRoot({
       validationSchema: configSchema,
       isGlobal: true,
-      ignoreEnvFile: true,
       validationOptions: {
         allowUnknown: true,
-        abortEarly: false
+        abortEarly: false,
       },
     }),
     TypeOrmModule.forRoot(typeOrmConfig as TypeOrmModuleOptions),
@@ -39,10 +37,6 @@ import { configSchema } from './config/config.service';
     {
       provide: 'APP_FILTER',
       useClass: ExceptionsFilterFilter,
-    },
-    {
-      provide: 'APP_PIPE',
-      useClass: ValidationPipe,
     },
   ],
 })

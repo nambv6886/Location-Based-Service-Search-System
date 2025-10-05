@@ -1,10 +1,10 @@
-import { IResponse } from "src/models/interfaces/i-response";
-import { ResponseMessage } from "src/models/interfaces/response.message.model";
+import { IResponse } from 'src/models/interfaces/i-response';
+import { ResponseMessage } from 'src/models/interfaces/response.message.model';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, MinLength } from "class-validator";
-import { MessageCode } from "../../../common/constants/message-code.constant";
-import { EMAIL_REGEX } from "../../../common/constants/common";
-import { Matches } from "class-validator";
+import { IsNotEmpty, MinLength } from 'class-validator';
+import { MessageCode } from '../../../common/constants/message-code.constant';
+import { EMAIL_REGEX } from '../../../common/constants/common';
+import { Matches } from 'class-validator';
 
 export class LoginRequest {
   @ApiProperty()
@@ -66,7 +66,6 @@ export interface JwtPayload {
   role: string;
 }
 
-
 export class ResetPasswordRequest {
   @ApiProperty()
   @IsNotEmpty({ message: MessageCode.ACCOUNT_TOKEN_REQUIRED })
@@ -98,7 +97,6 @@ export class RegisterRequest {
   @MinLength(10, { message: MessageCode.PASSWORD_IS_INVALID_MIN_LENGTH })
   @ApiProperty()
   public password: string;
-
 
   constructor(fields?: Partial<RegisterRequest>) {
     if (fields) {

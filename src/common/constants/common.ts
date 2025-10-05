@@ -6,3 +6,8 @@ export const CIPHER_KEY = 'CIPHER_KEY';
 export enum TokenType {
   RESET_PASSWORD_TOKEN = 'RESET_PASSWORD_TOKEN',
 }
+
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}

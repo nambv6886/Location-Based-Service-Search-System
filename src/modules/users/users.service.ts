@@ -19,7 +19,8 @@ import { GetListRequest } from 'src/models/pagination/pagination.model';
 import { UserEntity } from './entities/user.entity';
 import { CommonUtils } from '../../common/utils/common.utils';
 import { MessageCode } from '../../common/constants/message-code.constant';
-import { HashUtils } from 'src/common/utils/hash.utils';
+import { HashUtils } from '../../common/utils/hash.utils';
+import { UserRole } from '../../common/constants/common';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +32,7 @@ export class UsersService {
     try {
       const user = await this.usersRepository.findOneBy({ 
         email: createUserDto.email,
-        isActive: true
+        isActive: true,
        });
       if (CommonUtils.isNotNullOrUndefined(user)) {
         return new CreateUserResponse({
@@ -48,6 +49,7 @@ export class UsersService {
         email: createUserDto.email,
         password: hashedPassword,
         salt,
+        role: UserRole.USER,
       });
       await this.usersRepository.save(newUser);
 

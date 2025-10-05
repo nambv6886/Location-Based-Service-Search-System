@@ -1,5 +1,6 @@
 export enum ResponseStatus {
-  Success = 100,
-  Fail = 101,
+  Success = 200,
+  Fail = 400,
+  NotFound = 404,
   FailWithMessage = 102,
 }

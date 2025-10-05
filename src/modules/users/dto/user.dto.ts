@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator'
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 import { MessageCode } from '../../../common/constants/message-code.constant';
 import { ApiProperty } from '@nestjs/swagger';
 import { EMAIL_REGEX } from '../../../common/constants/common';

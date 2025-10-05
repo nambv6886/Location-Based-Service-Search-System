@@ -1,13 +1,7 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import * as dotenv from 'dotenv';
 import * as path from 'path';
+import 'dotenv/config';
 
-// const isCompiled = path.extname(__filename) === '.js';
-const filePath = `../../.env`;
-const envFilePath = path.join(__dirname, filePath);
-
-// Load environment variables
-dotenv.config({ path: envFilePath });
 const baseConfig = {
   type: process.env.DB_TYPE,
   host: process.env.DB_HOST,
@@ -17,6 +11,8 @@ const baseConfig = {
   database: process.env.DB_NAME,
   entities: [path.join(__dirname, '/../**/*.entity{.ts,.js}')],
   migrations: [path.join(__dirname, '../migrations/*{.ts,.js}')],
+  retryAttempts: 5,
+  retryDelay: 2000,
   // migraionsRun: true
 };
 
