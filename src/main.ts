@@ -19,14 +19,11 @@ async function bootstrap() {
     .setTitle('Location Based Service Search System')
     .setDescription('The location based service search system API description')
     .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-      'bearer', // This is the name that @ApiBearerAuth('bearer') will reference
-    )
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

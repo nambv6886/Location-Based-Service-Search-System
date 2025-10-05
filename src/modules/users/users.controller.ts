@@ -52,7 +52,7 @@ export class UsersController {
     status: 200,
     type: GetUserListResponse,
   })
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(
@@ -68,7 +68,7 @@ export class UsersController {
     status: 200,
     type: GetUserResponse,
   })
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string): Promise<GetUserResponse> {
@@ -82,7 +82,7 @@ export class UsersController {
     status: 200,
     type: UpdateUserResponse,
   })
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -96,7 +96,7 @@ export class UsersController {
     status: 200,
     type: DeleteUserResponse,
   })
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {

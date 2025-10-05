@@ -64,7 +64,7 @@ export class GetUserResponse implements IResponse {
   @ApiProperty()
   responseMessage: ResponseMessage;
   @ApiProperty()
-  account: UserInfo;
+  user: UserInfo;
 
   constructor(fields?: Partial<GetUserResponse>) {
     if (fields) {
