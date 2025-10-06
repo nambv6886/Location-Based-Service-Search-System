@@ -1,9 +1,11 @@
-import { 
-  Column, Entity, PrimaryGeneratedColumn,
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
-  JoinColumn
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 
 import { UserEntity } from '../../users/entities/user.entity';
@@ -22,8 +24,9 @@ export class UserTokenEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  user: UserEntity;
+
   @Column({ name: 'user_id' })
   userId: string;
 

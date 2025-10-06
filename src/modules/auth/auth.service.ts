@@ -241,6 +241,8 @@ export class AuthService {
 
       user.password = newPassword;
       user.salt = salt;
+      // Set passwordChangedAt to invalidate all existing JWT tokens
+      user.passwordChangedAt = new Date();
       await this.usersService.update(user.id, user);
 
       // Clean token after reset password is success

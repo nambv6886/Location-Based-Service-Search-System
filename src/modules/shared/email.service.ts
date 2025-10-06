@@ -1,32 +1,53 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { ConfigService } from "@nestjs/config";
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class EmailService {
-  constructor(
-    private readonly configService: ConfigService,
-  ) { }
+export class EmailService implements OnModuleInit {
+  private testAccount: any;
+  private isInitialized = false;
+
+  constructor(private readonly configService: ConfigService) {}
+
+  async onModuleInit() {
+    try {
+      // Generate test account on module initialization
+      this.testAccount = await nodemailer.createTestAccount();
+      this.isInitialized = true;
+      Logger.log(
+        `[EmailService] Test account created: ${this.testAccount.user}`,
+      );
+      Logger.log(
+        `[EmailService] View emails at: https://ethereal.email/messages`,
+      );
+    } catch (error) {
+      Logger.error('[EmailService] Failed to create test account:', error);
+    }
+  }
 
   private getMailTransporter() {
+    if (!this.isInitialized || !this.testAccount) {
+      throw new Error('Email service not initialized. Please wait...');
+    }
+
     return nodemailer.createTransport({
-      host: this.configService.get('EMAIL_SMTP_HOST'),
-      port: this.configService.get('EMAIL_SMTP_PORT'),
-      secure: false, // EMAIL_ENABLE_SSL,
+      host: this.testAccount.smtp.host,
+      port: this.testAccount.smtp.port,
+      secure: this.testAccount.smtp.secure,
       auth: {
-        user: this.configService.get('EMAIL_USER_NAME'),
-        pass: this.configService.get('EMAIL_PASSWORD'),
+        user: this.testAccount.user,
+        pass: this.testAccount.pass,
       },
       tls: {
         // do not fail on invalid certs
-        rejectUnauthorized: false
-      }
+        rejectUnauthorized: false,
+      },
     });
   }
 
   public sendMailResetPassword(mailReceiver: string, url: string) {
     const mailOptions = {
-      from: this.configService.get('EMAIL_USER_NAME'),
+      from: `"Password Reset" <${this.testAccount.user}>`,
       to: mailReceiver,
       subject: this.configService.get('EMAIL_RESET_PASSWORD_SUBJECT'),
       html: `
@@ -53,16 +74,21 @@ export class EmailService {
 
     this.getMailTransporter().sendMail(mailOptions, (error, info) => {
       if (error) {
-        Logger.error(JSON.stringify(error));
+        Logger.error(
+          '[EmailService] Error sending email:',
+          JSON.stringify(error),
+        );
       } else {
-        Logger.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        Logger.log(`[EmailService] ✅ Email sent successfully!`);
+        Logger.log(`[EmailService] 📧 Preview URL: ${previewUrl}`);
       }
     });
   }
 
   public sendMail(mailReceiver: string, mailSubject: string, content: string) {
     const mailOptions = {
-      from: this.configService.get('EMAIL_USER_NAME'),
+      from: `"System" <${this.testAccount.user}>`,
       to: mailReceiver,
       subject: mailSubject,
       html: content,
@@ -70,9 +96,14 @@ export class EmailService {
 
     this.getMailTransporter().sendMail(mailOptions, (error, info) => {
       if (error) {
-        Logger.error(JSON.stringify(error));
+        Logger.error(
+          '[EmailService] Error sending email:',
+          JSON.stringify(error),
+        );
       } else {
-        Logger.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        Logger.log(`[EmailService] ✅ Email sent successfully!`);
+        Logger.log(`[EmailService] 📧 Preview URL: ${previewUrl}`);
       }
     });
   }

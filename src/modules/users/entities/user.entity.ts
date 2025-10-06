@@ -1,4 +1,10 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -17,9 +23,12 @@ export class UserEntity {
   // admin or user
   @Column()
   role: string;
-  
+
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  passwordChangedAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
