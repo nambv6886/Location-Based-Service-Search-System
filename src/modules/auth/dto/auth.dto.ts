@@ -1,5 +1,5 @@
-import { IResponse } from 'src/models/interfaces/i-response';
-import { ResponseMessage } from 'src/models/interfaces/response.message.model';
+import { IResponse } from '../../../models/interfaces/i-response';
+import { ResponseMessage } from '../../../models/interfaces/response.message.model';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, MinLength } from 'class-validator';
 import { MessageCode } from '../../../common/constants/message-code.constant';

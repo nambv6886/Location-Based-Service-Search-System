@@ -4,11 +4,11 @@ export class CommonUtils {
   }
 
   public static isNullOrUndefined(value: any) {
-    return typeof value === 'undefined' && value == null;
+    return typeof value === 'undefined' || value == null;
   }
 
   public static diffMilliseconds(date1: Date, date2: Date): number {
-    const milisecond = (date1.getTime() - date2.getTime());
+    const milisecond = date1.getTime() - date2.getTime();
     return milisecond;
   }
 

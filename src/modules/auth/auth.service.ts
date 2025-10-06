@@ -175,6 +175,9 @@ export class AuthService {
         responseMessage: new ResponseMessage({
           status: ResponseStatus.Success,
           messageCode: MessageCode.SUCCESS,
+          data: {
+            token: passwordResetToken,
+          },
         }),
       });
     } catch (error) {
