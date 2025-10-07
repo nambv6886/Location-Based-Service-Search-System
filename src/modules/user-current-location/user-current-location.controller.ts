@@ -21,6 +21,10 @@ import {
 import { UserCurrentLocationService } from './user-current-location.service';
 import { UpdateUserCurrentLocationDto } from './dto/update-user-current-location.dto';
 import { GetUserLocationDto } from './dto/get-user-location.dto';
+import {
+  UpdateLocationResponse,
+  GetLocationResponse,
+} from './dto/location-responses.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../users/current-user.decorator';
 import { UserEntity } from '../users/entities/user.entity';
@@ -42,7 +46,7 @@ export class UserCurrentLocationController {
   @ApiResponse({
     status: 200,
     description: 'Location updated successfully',
-    type: GetUserLocationDto,
+    type: UpdateLocationResponse,
   })
   @ApiResponse({
     status: 401,
@@ -56,7 +60,7 @@ export class UserCurrentLocationController {
     @Req() req: any,
     @Body() updateLocationDto: UpdateUserCurrentLocationDto,
     @CurrentUser() user: UserEntity,
-  ): Promise<GetUserLocationDto> {
+  ): Promise<UpdateLocationResponse> {
     const userId = user.id;
     this.logger.log(`User ${userId} updating location`);
     return this.userCurrentLocationService.updateLocation(
@@ -70,7 +74,7 @@ export class UserCurrentLocationController {
   @ApiResponse({
     status: 200,
     description: 'Location retrieved successfully',
-    type: GetUserLocationDto,
+    type: GetLocationResponse,
   })
   @ApiResponse({
     status: 404,
@@ -78,7 +82,7 @@ export class UserCurrentLocationController {
   })
   async getMyLocation(
     @CurrentUser() user: UserEntity,
-  ): Promise<GetUserLocationDto> {
+  ): Promise<GetLocationResponse> {
     const userId = user.id;
     this.logger.log(`User ${userId} fetching their location`);
     return this.userCurrentLocationService.getLocation(userId);

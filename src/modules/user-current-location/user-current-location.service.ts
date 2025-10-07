@@ -12,6 +12,14 @@ import { UpdateUserCurrentLocationDto } from './dto/update-user-current-location
 import { UserCurrentLocationEntity } from './entities/user-current-location.entity';
 import { RedisService } from '../shared/redis.service';
 import { GetUserLocationDto } from './dto/get-user-location.dto';
+import { ResponseMessage } from '../../models/interfaces/response.message.model';
+import { ResponseStatus } from '../../models/interfaces/response.status.model';
+import { MessageCode } from '../../common/constants/message-code.constant';
+import {
+  UpdateLocationResponse,
+  GetLocationResponse,
+} from './dto/location-responses.dto';
+import { LocationInfo } from './dto/location-info.dto';
 
 @Injectable()
 export class UserCurrentLocationService {
@@ -48,12 +56,12 @@ export class UserCurrentLocationService {
   async updateLocation(
     userId: string,
     updateDto: UpdateUserCurrentLocationDto,
-  ): Promise<GetUserLocationDto> {
+  ): Promise<UpdateLocationResponse> {
     const lockKey = this.getLockKey(userId);
 
     try {
       // Use distributed lock to handle concurrent updates for the same user
-      return await this.redisService.withLock(
+      const locationData = await this.redisService.withLock(
         lockKey,
         async () => {
           return await this.performLocationUpdate(userId, updateDto);
@@ -64,16 +72,37 @@ export class UserCurrentLocationService {
           retryDelayMs: 100,
         },
       );
+
+      return new UpdateLocationResponse({
+        responseMessage: new ResponseMessage({
+          status: ResponseStatus.Success,
+          messageCode: MessageCode.SUCCESS,
+        }),
+        location: new LocationInfo({
+          userId: locationData.userId,
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
+          updatedAt: locationData.updatedAt,
+        } as UserCurrentLocationEntity),
+      });
     } catch (error) {
       this.logger.error(`Failed to update location for user ${userId}:`, error);
 
       if (error.message?.includes('Failed to acquire lock')) {
-        throw new ConflictException(
-          'Location update in progress, please try again',
-        );
+        return new UpdateLocationResponse({
+          responseMessage: new ResponseMessage({
+            status: ResponseStatus.Fail,
+            messageCode: MessageCode.FAIL,
+          }),
+        });
       }
 
-      throw new InternalServerErrorException('Failed to update location');
+      return new UpdateLocationResponse({
+        responseMessage: new ResponseMessage({
+          status: ResponseStatus.Fail,
+          messageCode: MessageCode.FAIL,
+        }),
+      });
     }
   }
 
@@ -162,13 +191,24 @@ export class UserCurrentLocationService {
   /**
    * Get user's current location from cache or database
    */
-  async getLocation(userId: string): Promise<GetUserLocationDto> {
+  async getLocation(userId: string): Promise<GetLocationResponse> {
     try {
       // Try to get from cache first
       const cachedLocation = await this.getCachedLocation(userId);
       if (cachedLocation) {
         this.logger.debug(`Cache hit for user ${userId}`);
-        return cachedLocation;
+        return new GetLocationResponse({
+          responseMessage: new ResponseMessage({
+            status: ResponseStatus.Success,
+            messageCode: MessageCode.SUCCESS,
+          }),
+          location: new LocationInfo({
+            userId: cachedLocation.userId,
+            latitude: cachedLocation.latitude,
+            longitude: cachedLocation.longitude,
+            updatedAt: cachedLocation.updatedAt,
+          } as UserCurrentLocationEntity),
+        });
       }
 
       this.logger.debug(`Cache miss for user ${userId}, fetching from DB`);
@@ -182,7 +222,12 @@ export class UserCurrentLocationService {
       });
 
       if (!location) {
-        throw new NotFoundException(`Location not found for user ${userId}`);
+        return new GetLocationResponse({
+          responseMessage: new ResponseMessage({
+            status: ResponseStatus.Fail,
+            messageCode: MessageCode.NOT_FOUND,
+          }),
+        });
       }
 
       const locationDto: GetUserLocationDto = {
@@ -195,14 +240,21 @@ export class UserCurrentLocationService {
       // Cache for future requests
       await this.cacheLocation(userId, locationDto);
 
-      return locationDto;
+      return new GetLocationResponse({
+        responseMessage: new ResponseMessage({
+          status: ResponseStatus.Success,
+          messageCode: MessageCode.SUCCESS,
+        }),
+        location: new LocationInfo(location),
+      });
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
       this.logger.error(`Error getting location for user ${userId}:`, error);
-      throw new InternalServerErrorException('Failed to retrieve location');
+      return new GetLocationResponse({
+        responseMessage: new ResponseMessage({
+          status: ResponseStatus.Fail,
+          messageCode: MessageCode.FAIL,
+        }),
+      });
     }
   }
 
