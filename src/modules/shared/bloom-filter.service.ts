@@ -1,16 +1,12 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { REDIS_CLIENT } from '../../common/constants/common';
-import { RedisClientType } from 'redis';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { RedisService } from './redis.service';
 
 @Injectable()
 export class BloomFilterService implements OnModuleInit {
   private readonly logger = new Logger(BloomFilterService.name);
   private readonly USER_EMAIL_BLOOM_FILTER = 'user:email:bloom';
 
-  constructor(
-    @Inject(REDIS_CLIENT)
-    private readonly redisClient: RedisClientType,
-  ) {}
+  constructor(private readonly redisService: RedisService) {}
 
   async onModuleInit() {
     try {
@@ -23,13 +19,13 @@ export class BloomFilterService implements OnModuleInit {
 
   private async initializeBloomFilter(): Promise<void> {
     try {
-      const exists = await this.redisClient.exists(
-        this.USER_EMAIL_BLOOM_FILTER,
-      );
+      const exists = await this.redisService
+        .getClient()
+        .exists(this.USER_EMAIL_BLOOM_FILTER);
 
       if (!exists) {
         // Reserve bloom filter with initial capacity and error rate
-        await this.redisClient.sendCommand([
+        await this.redisService.getClient().sendCommand([
           'BF.RESERVE',
           this.USER_EMAIL_BLOOM_FILTER,
           '0.001', // error rate (1%)
@@ -50,11 +46,9 @@ export class BloomFilterService implements OnModuleInit {
   async addEmail(email: string): Promise<boolean> {
     try {
       const normalizedEmail = email.toLowerCase().trim();
-      const result = await this.redisClient.sendCommand([
-        'BF.ADD',
-        this.USER_EMAIL_BLOOM_FILTER,
-        normalizedEmail,
-      ]);
+      const result = await this.redisService
+        .getClient()
+        .sendCommand(['BF.ADD', this.USER_EMAIL_BLOOM_FILTER, normalizedEmail]);
 
       return Number(result) === 1;
     } catch (error) {
@@ -66,11 +60,13 @@ export class BloomFilterService implements OnModuleInit {
   async mightExist(email: string): Promise<boolean> {
     try {
       const normalizedEmail = email.toLowerCase().trim();
-      const result = await this.redisClient.sendCommand([
-        'BF.EXISTS',
-        this.USER_EMAIL_BLOOM_FILTER,
-        normalizedEmail,
-      ]);
+      const result = await this.redisService
+        .getClient()
+        .sendCommand([
+          'BF.EXISTS',
+          this.USER_EMAIL_BLOOM_FILTER,
+          normalizedEmail,
+        ]);
 
       return Number(result) === 1;
     } catch (error) {
@@ -93,7 +89,7 @@ export class BloomFilterService implements OnModuleInit {
       );
 
       // Use pipeline for better performance
-      const pipeline = this.redisClient.multi();
+      const pipeline = this.redisService.getClient().multi();
 
       for (const email of normalizedEmails) {
         pipeline.addCommand(['BF.ADD', this.USER_EMAIL_BLOOM_FILTER, email]);
@@ -109,10 +105,9 @@ export class BloomFilterService implements OnModuleInit {
 
   async getBloomFilterInfo(): Promise<any> {
     try {
-      const info = await this.redisClient.sendCommand([
-        'BF.INFO',
-        this.USER_EMAIL_BLOOM_FILTER,
-      ]);
+      const info = await this.redisService
+        .getClient()
+        .sendCommand(['BF.INFO', this.USER_EMAIL_BLOOM_FILTER]);
       return info;
     } catch (error) {
       this.logger.error('Error getting bloom filter info', error);
@@ -122,7 +117,7 @@ export class BloomFilterService implements OnModuleInit {
 
   async resetBloomFilter(): Promise<void> {
     try {
-      await this.redisClient.del(this.USER_EMAIL_BLOOM_FILTER);
+      await this.redisService.getClient().del(this.USER_EMAIL_BLOOM_FILTER);
       await this.initializeBloomFilter();
       this.logger.log('Bloom filter reset successfully');
     } catch (error) {

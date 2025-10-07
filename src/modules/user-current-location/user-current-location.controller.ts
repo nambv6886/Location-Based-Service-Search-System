@@ -1,34 +1,86 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Body,
+  UseGuards,
+  Req,
+  HttpStatus,
+  HttpCode,
+  Query,
+  Logger,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { UserCurrentLocationService } from './user-current-location.service';
-import { CreateUserCurrentLocationDto } from './dto/create-user-current-location.dto';
 import { UpdateUserCurrentLocationDto } from './dto/update-user-current-location.dto';
+import { GetUserLocationDto } from './dto/get-user-location.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../users/current-user.decorator';
+import { UserEntity } from '../users/entities/user.entity';
 
-@Controller('user-current-location')
+@ApiTags('Location')
+@Controller('location')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class UserCurrentLocationController {
-  constructor(private readonly userCurrentLocationService: UserCurrentLocationService) {}
+  private readonly logger = new Logger(UserCurrentLocationController.name);
 
-  @Post()
-  create(@Body() createUserCurrentLocationDto: CreateUserCurrentLocationDto) {
-    return this.userCurrentLocationService.create(createUserCurrentLocationDto);
+  constructor(
+    private readonly userCurrentLocationService: UserCurrentLocationService,
+  ) {}
+
+  @Put('update')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update current user location' })
+  @ApiResponse({
+    status: 200,
+    description: 'Location updated successfully',
+    type: GetUserLocationDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Location update in progress, concurrent request detected',
+  })
+  async updateMyLocation(
+    @Req() req: any,
+    @Body() updateLocationDto: UpdateUserCurrentLocationDto,
+    @CurrentUser() user: UserEntity,
+  ): Promise<GetUserLocationDto> {
+    const userId = user.id;
+    this.logger.log(`User ${userId} updating location`);
+    return this.userCurrentLocationService.updateLocation(
+      userId,
+      updateLocationDto,
+    );
   }
 
-  @Get()
-  findAll() {
-    return this.userCurrentLocationService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userCurrentLocationService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserCurrentLocationDto: UpdateUserCurrentLocationDto) {
-    return this.userCurrentLocationService.update(+id, updateUserCurrentLocationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userCurrentLocationService.remove(+id);
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user location' })
+  @ApiResponse({
+    status: 200,
+    description: 'Location retrieved successfully',
+    type: GetUserLocationDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Location not found',
+  })
+  async getMyLocation(
+    @CurrentUser() user: UserEntity,
+  ): Promise<GetUserLocationDto> {
+    const userId = user.id;
+    this.logger.log(`User ${userId} fetching their location`);
+    return this.userCurrentLocationService.getLocation(userId);
   }
 }

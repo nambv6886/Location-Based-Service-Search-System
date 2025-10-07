@@ -1,8 +1,6 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-
-import { RedisClientType } from 'redis';
 
 import { UsersService } from '../users/users.service';
 import {
@@ -18,21 +16,19 @@ import { ResponseMessage } from '../../models/interfaces/response.message.model'
 import { ResponseStatus } from '../../models/interfaces/response.status.model';
 import { UserEntity } from '../users/entities/user.entity';
 import { MessageCode } from '../../common/constants/message-code.constant';
-import {
-  REDIS_CLIENT,
-  REDIS_KEY_FORGOT_PASSWORD,
-} from '../../common/constants/common';
+import { REDIS_KEY_FORGOT_PASSWORD } from '../../common/constants/common';
 import { CommonUtils } from '../../common/utils/common.utils';
 import { HashUtils } from '../../common/utils/hash.utils';
 import { UserTokenService } from '../user-token/user-token.service';
 import { EmailService } from '../shared/email.service';
 import { UserTokenEntity } from '../user-token/entities/user-token.entity';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from '../shared/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(REDIS_CLIENT) private readonly redisClient: RedisClientType,
+    private readonly redisService: RedisService,
     private readonly usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -116,7 +112,7 @@ export class AuthService {
       }
 
       const keyCacheRequest = `${forgotPasswordRequest.email}`;
-      const result = await this.redisClient.hGet(
+      const result = await this.redisService.hGet(
         REDIS_KEY_FORGOT_PASSWORD,
         keyCacheRequest,
       );
@@ -125,7 +121,7 @@ export class AuthService {
       const FORGOT_PASSWORD_WAIT_TIME_IN_SECONDS =
         +this.configService.get('FORGOT_PASSWORD_WAIT_TIME_IN_SECONDS') || 60;
 
-      if (result !== null) {
+      if (result !== null && result !== undefined) {
         diffTime = CommonUtils.diffTotalSeconds(
           new Date(Date.now()),
           new Date(+result),
@@ -143,7 +139,7 @@ export class AuthService {
         });
       }
 
-      await this.redisClient.hSet(
+      await this.redisService.hSet(
         REDIS_KEY_FORGOT_PASSWORD,
         keyCacheRequest,
         Date.now().toString(),
@@ -264,14 +260,12 @@ export class AuthService {
     }
   }
 
-  public deactiveAccessToken(token: string): void {
+  public async deactiveAccessToken(token: string): Promise<void> {
     if (!token || typeof token !== 'string') {
       return;
     }
     token = token.substring(7).trim();
-    this.redisClient.SET(token, 'deactivated', {
-      EX: 3600,
-    });
+    await this.redisService.set(token, 'deactivated', 3600);
   }
 
   public async isTokenDeactivate(token: string): Promise<boolean> {
@@ -280,7 +274,7 @@ export class AuthService {
         return true;
       }
 
-      const tokenInCache = await this.redisClient.get(token);
+      const tokenInCache = await this.redisService.get(token);
       const isVerify = this.jwtService.verify(token);
       if (tokenInCache || !isVerify) {
         return true;
