@@ -11,6 +11,8 @@ import { UserFavoritesModule } from './modules/user-favorites/user-favorites.mod
 import { ConfigModule } from '@nestjs/config';
 import { configSchema } from './config/config.service';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -22,6 +24,12 @@ import { SeederModule } from './modules/seeder/seeder.module';
         abortEarly: false,
       },
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // Time window in milliseconds (1 minute)
+        limit: 10, // Max requests per ttl window
+      },
+    ]),
     TypeOrmModule.forRoot(typeOrmConfig as TypeOrmModuleOptions),
     UsersModule,
     AuthModule,
@@ -39,6 +47,10 @@ import { SeederModule } from './modules/seeder/seeder.module';
     {
       provide: 'APP_FILTER',
       useClass: ExceptionsFilterFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

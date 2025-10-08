@@ -86,7 +86,7 @@ export class SeederService {
             latitude,
             longitude,
             location: () =>
-              `ST_GeomFromText('POINT(${longitude} ${latitude})', 4326)`,
+              `ST_GeomFromText('POINT(${latitude} ${longitude})', 4326)`,
             isActive: true,
           } as any)
           .execute();
