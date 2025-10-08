@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { SeederService } from './modules/seeder/seeder.service';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
@@ -33,7 +35,21 @@ async function bootstrap() {
     },
   });
 
+  // Run database seeder if enabled
+  const runSeeder = process.env.RUN_SEEDER === 'true';
+  if (runSeeder) {
+    logger.log('Database seeding is enabled...');
+    const seeder = app.get(SeederService);
+    await seeder.seed();
+  }
+
   await app.listen(process.env.PORT ?? 3000);
+  logger.log(
+    `Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
+  );
+  logger.log(
+    `Swagger documentation is available at: http://localhost:${process.env.PORT ?? 3000}/api/docs`,
+  );
 }
 
 bootstrap();

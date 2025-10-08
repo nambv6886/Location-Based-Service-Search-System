@@ -10,6 +10,7 @@ import { UserCurrentLocationModule } from './modules/user-current-location/user-
 import { UserFavoritesModule } from './modules/user-favorites/user-favorites.module';
 import { ConfigModule } from '@nestjs/config';
 import { configSchema } from './config/config.service';
+import { SeederModule } from './modules/seeder/seeder.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { configSchema } from './config/config.service';
     StoresModule,
     UserCurrentLocationModule,
     UserFavoritesModule,
+    SeederModule,
   ],
   controllers: [],
   providers: [
