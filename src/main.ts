@@ -10,12 +10,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security middleware
-  app.use(
-    helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
-    }),
-  );
+  // app.use(
+  //   helmet({
+  //     contentSecurityPolicy: false,
+  //     crossOriginEmbedderPolicy: false,
+  //   }),
+  // );
 
   app.enableCors();
 
