@@ -16,12 +16,19 @@ RUN apk add --no-cache netcat-openbsd
 COPY --from=build-stage /app/dist ./dist
 COPY --from=build-stage /app/package*.json ./
 
+# Copy source config and migrations for TypeORM CLI
+COPY --from=build-stage /app/src/config ./src/config
+COPY --from=build-stage /app/src/migrations ./src/migrations
+
 # Copy entrypoint script
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
 # Install only production dependencies
 RUN npm install --only=production
+
+# Install ts-node and typescript for running migrations
+RUN npm install ts-node typescript @types/node --save-dev
 
 # Expose the application port
 EXPOSE 3000
