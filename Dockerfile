@@ -20,6 +20,9 @@ COPY --from=build-stage /app/package*.json ./
 COPY --from=build-stage /app/src/config ./src/config
 COPY --from=build-stage /app/src/migrations ./src/migrations
 
+# Copy TypeScript configuration
+COPY --from=build-stage /app/tsconfig.json ./tsconfig.json
+
 # Copy entrypoint script
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
