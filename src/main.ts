@@ -9,8 +9,19 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Security middleware
-  app.use(helmet());
+  // Security middleware - Configure helmet to allow Swagger
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: [`'self'`],
+          styleSrc: [`'self'`, `'unsafe-inline'`],
+          imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+        },
+      },
+    }),
+  );
 
   app.enableCors();
 
@@ -47,12 +58,12 @@ async function bootstrap() {
     await seeder.seed();
   }
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  // Listen on 0.0.0.0 to accept connections from outside the container
+  await app.listen(port, '0.0.0.0');
+  logger.log(`Application is running on: http://0.0.0.0:${port}`);
   logger.log(
-    `Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
-  );
-  logger.log(
-    `Swagger documentation is available at: http://localhost:${process.env.PORT ?? 3000}/api/docs`,
+    `Swagger documentation is available at: http://0.0.0.0:${port}/api/docs`,
   );
 }
 
