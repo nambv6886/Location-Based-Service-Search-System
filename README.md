@@ -4,16 +4,14 @@ A robust and scalable location-based service search system built with NestJS, Ty
 
 ## 🚀 Live Demo
 
-The application is deployed and accessible at:
+The application swagger docs is deployed and accessible at:
 **[http://18.138.51.60:3000/api/docs](http://18.138.51.60:3000/api/docs)**
 
 ## ✨ Features
 
 - **User Authentication & Authorization**
-  - JWT-based authentication with access and refresh tokens
-  - Secure password management with bcrypt
-  - Password reset functionality via email
-  - Token invalidation and session management
+  - JWT-based authentication
+  - Password reset
 
 - **Location-Based Search**
   - Search stores by user's current location
@@ -31,13 +29,6 @@ The application is deployed and accessible at:
   - Store categorization
   - Geolocation data storage
   - Advanced search and filtering
-
-- **Security Features**
-  - Rate limiting with throttling
-  - Helmet for HTTP security headers
-  - CORS enabled
-  - Password encryption
-  - JWT token management
 
 - **API Documentation**
   - Interactive Swagger/OpenAPI documentation
@@ -215,7 +206,7 @@ Most endpoints require JWT authentication. To authenticate:
 1. Register a new user via `/auth/register` or use seeded credentials
 2. Login via `/auth/login` to get an access token
 3. Click the "Authorize" button in Swagger UI
-4. Enter: `Bearer <your_access_token>`
+4. Enter: `your_access_token`
 
 ## 🧪 Testing
 
@@ -228,10 +219,6 @@ npm run test:watch
 
 # Run tests with coverage
 npm run test:cov
-
-# Run e2e tests
-npm run test:e2e
-```
 
 ## 📁 Project Structure
 
@@ -271,35 +258,12 @@ The project includes Docker support with:
 - **Docker Compose** orchestration for app, MySQL, and Redis
 - **Volume persistence** for database and cache data
 - **Network isolation** with custom bridge network
-- **Health checks** and automatic restarts
 
 ### Container Details
 
 - **app-lds:** Main NestJS application (Port 3000)
 - **mysql-lds:** MySQL 8.0 database (Port 3306)
 - **redis-lds:** Redis Stack Server (Port 6379)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under UNLICENSED.
-
-## 👤 Author
-
-Built as part of an assignment project.
-
-## 📧 Support
-
-For questions or issues, please open an issue in the repository or contact the development team.
-
----
 
 **Happy Coding! 🎉**
 
