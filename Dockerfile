@@ -10,9 +10,15 @@ RUN npm run build
 FROM node:22-alpine AS production-stage
 WORKDIR /app
 
+RUN apk add --no-cache netcat-openbsd
+
 # Copy only the build artifacts and essential files from the build stage
 COPY --from=build-stage /app/dist ./dist
 COPY --from=build-stage /app/package*.json ./
+
+# Copy entrypoint script
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
 # Install only production dependencies
 RUN npm install --only=production
@@ -21,4 +27,4 @@ RUN npm install --only=production
 EXPOSE 3000
 
 # Define the command to run the app
-CMD ["npm", "run", "start:prod"]
+CMD ["./entrypoint.sh"]
