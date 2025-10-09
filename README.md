@@ -206,7 +206,7 @@ Most endpoints require JWT authentication. To authenticate:
 1. Register a new user via `/auth/register` or use seeded credentials
 2. Login via `/auth/login` to get an access token
 3. Click the "Authorize" button in Swagger UI
-4. Enter: `your_access_token`
+4. Enter: `your_access_token>`
 
 ## 🧪 Testing
 
@@ -219,6 +219,8 @@ npm run test:watch
 
 # Run tests with coverage
 npm run test:cov
+
+```
 
 ## 📁 Project Structure
 
@@ -258,7 +260,6 @@ The project includes Docker support with:
 - **Docker Compose** orchestration for app, MySQL, and Redis
 - **Volume persistence** for database and cache data
 - **Network isolation** with custom bridge network
-
 ### Container Details
 
 - **app-lds:** Main NestJS application (Port 3000)
