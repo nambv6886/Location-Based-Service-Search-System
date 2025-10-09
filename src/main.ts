@@ -9,17 +9,11 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Security middleware - Configure helmet to allow Swagger
+  // Security middleware
   app.use(
     helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [`'self'`],
-          styleSrc: [`'self'`, `'unsafe-inline'`],
-          imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
-        },
-      },
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
     }),
   );
 
